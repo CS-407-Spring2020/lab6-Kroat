@@ -1,5 +1,6 @@
 package com.example.android.lab_6;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 import android.Manifest;
@@ -43,20 +44,28 @@ public class MainActivity extends FragmentActivity {
                 Manifest.permission.ACCESS_FINE_LOCATION);
         if (permission == PackageManager.PERMISSION_DENIED) {
             ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+            displayMyLocation();
         }
         else {
-            mLocationRequest = new LocationRequest();
-            mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-            mLocationRequest.setInterval(100);
-            mLocationRequest.setFastestInterval(100);
-
             mFusedLocationProviderClient.getLastLocation().addOnCompleteListener(this, task -> {
                 Location mLastKnownLocation = task.getResult();
                 if (task.isSuccessful() && mLastKnownLocation != null) {
-                    mMap.addPolyline(new PolylineOptions().add( new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()), mDestinationLatLng));
                     mMap.addMarker(new MarkerOptions().position(new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude())).title("Current Location"));
+                    mMap.addPolyline(new PolylineOptions().add( new LatLng(mLastKnownLocation.getLatitude(), mLastKnownLocation.getLongitude()), mDestinationLatLng));
+
                 }
             });
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults){
+        if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION){
+            if(grantResults.length >0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                displayMyLocation();
+            }
         }
     }
 }
